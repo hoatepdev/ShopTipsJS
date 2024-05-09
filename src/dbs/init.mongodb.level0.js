@@ -1,7 +1,7 @@
 "use strict";
 
 const mongoose = require("mongoose");
-const connectString = `mongodb://localhost:27017/ShopDev`;
+const connectString = `mongodb://localhost:27017/ShopDEV`;
 
 mongoose
   .connect(connectString)
