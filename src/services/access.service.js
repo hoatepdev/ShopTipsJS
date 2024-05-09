@@ -6,7 +6,7 @@ const crypto = require("crypto");
 const KeyTokenService = require("./keyToken.service");
 const { createTokenPair } = require("../auth/authUtils");
 const { getInfoData } = require("../utils");
-const { BadRequestError } = require("../core/success.response");
+const { BadRequestError } = require("../core/error.response");
 
 const RoleShop = {
   SHOP: "SHOP",
@@ -18,7 +18,6 @@ const RoleShop = {
 class AccessService {
   static signUp = async ({ name, email, password }) => {
     // try {
-    a;
     const hodelShop = await shopModel.findOne({ email }).lean();
 
     if (hodelShop) {
