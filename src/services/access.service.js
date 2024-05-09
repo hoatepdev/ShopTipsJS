@@ -6,6 +6,7 @@ const crypto = require("crypto");
 const KeyTokenService = require("./keyToken.service");
 const { createTokenPair } = require("../auth/authUtils");
 const { getInfoData } = require("../utils");
+const { BadRequestError } = require("../core/success.response");
 
 const RoleShop = {
   SHOP: "SHOP",
@@ -16,82 +17,80 @@ const RoleShop = {
 
 class AccessService {
   static signUp = async ({ name, email, password }) => {
-    try {
-      const hodelShop = await shopModel.findOne({ email }).lean();
+    // try {
+    a;
+    const hodelShop = await shopModel.findOne({ email }).lean();
 
-      if (hodelShop) {
+    if (hodelShop) {
+      throw new BadRequestError("Error: Shop already registerd!");
+    }
+    const passwordHash = await bcrypt.hash(password, 10);
+    const newShop = await shopModel.create({
+      name,
+      email,
+      password: passwordHash,
+      roles: [RoleShop.SHOP],
+    });
+    if (newShop) {
+      // tạo cặp key theo thuật toán rsa
+      const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
+        modulusLength: 4096,
+        publicKeyEncoding: {
+          type: "pkcs1",
+          format: "pem",
+        },
+        privateKeyEncoding: {
+          type: "pkcs1",
+          format: "pem",
+        },
+      });
+      console.log({ privateKey, publicKey });
+
+      // lưu publicKey vào db
+      const publicKeyString = await KeyTokenService.createKeyToken({
+        userId: newShop._id,
+        publicKey,
+      });
+      if (!publicKeyString) {
         return {
           code: "xxxx",
-          message: "Shop already registered!",
+          message: "publicKeyString error!",
         };
       }
-      const passwordHash = await bcrypt.hash(password, 10);
-      const newShop = await shopModel.create({
-        name,
-        email,
-        password: passwordHash,
-        roles: [RoleShop.SHOP],
-      });
-      if (newShop) {
-        // tạo cặp key theo thuật toán rsa
-        const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
-          modulusLength: 4096,
-          publicKeyEncoding: {
-            type: "pkcs1",
-            format: "pem",
-          },
-          privateKeyEncoding: {
-            type: "pkcs1",
-            format: "pem",
-          },
-        });
-        console.log({ privateKey, publicKey });
+      const publicKeyObject = crypto.createPublicKey(publicKeyString);
+      console.log("publicKeyObject", publicKeyObject);
 
-        // lưu publicKey vào db
-        const publicKeyString = await KeyTokenService.createKeyToken({
-          userId: newShop._id,
-          publicKey,
-        });
-        if (!publicKeyString) {
-          return {
-            code: "xxxx",
-            message: "publicKeyString error!",
-          };
-        }
-        const publicKeyObject = crypto.createPublicKey(publicKeyString);
-        console.log("publicKeyObject", publicKeyObject);
+      // create token pair
+      const tokens = await createTokenPair(
+        { userId: newShop._id, email },
+        publicKeyString,
+        privateKey
+      );
 
-        // create token pair
-        const tokens = await createTokenPair(
-          { userId: newShop._id, email },
-          publicKeyString,
-          privateKey
-        );
+      console.log("Created token success:", tokens);
 
-        console.log("Created token success:", tokens);
-
-        return {
-          code: 201,
-          metadata: {
-            shop: getInfoData({
-              fileds: ["_id", "name", "email"],
-              object: newShop,
-            }),
-            tokens,
-          },
-        };
-      }
       return {
-        code: 200,
-        metadata: null,
-      };
-    } catch (error) {
-      return {
-        code: "xxx",
-        message: error.message,
-        status: "error",
+        code: 201,
+        metadata: {
+          shop: getInfoData({
+            fileds: ["_id", "name", "email"],
+            object: newShop,
+          }),
+          tokens,
+        },
       };
     }
+    return {
+      code: 200,
+      metadata: null,
+    };
+    // } catch (error) {
+    //   return {
+    //     code: "xxx",
+    //     message: error.message,
+    //     status: "error",
+    //   };
+    // }
   };
 }
 

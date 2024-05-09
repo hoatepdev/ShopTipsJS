@@ -25,12 +25,20 @@ require("./dbs/init.mongodb");
 // init routes
 app.use("/", require("./routes"));
 
-app.get("/", (req, res) => {
-  const compressionStr = "Hello World!";
+// handling error
 
-  return res.status(200).json({
-    message: "123123aaaa123",
-    metadata: compressionStr.repeat(3000),
+app.use((req, res, next) => {
+  const error = new Error("Not Found");
+  error.status = 404;
+  next(error);
+});
+
+app.use((error, req, res, next) => {
+  const statusCode = error.status || 500;
+  return res.status(statusCode).json({
+    status: "error",
+    code: statusCode,
+    message: error.message || "Internal Server Error",
   });
 });
 
