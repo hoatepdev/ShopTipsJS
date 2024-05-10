@@ -47,7 +47,7 @@ const authentication = asyncHandler(async (req, res, next) => {
   // console.log("publicKey", keyStore.publicKey);
   JWT.verify(accessToken, keyStore.publicKey, (err, decode) => {
     if (err) throw new AuthFailureError("Invalid request");
-    console.log("decode verify: ", decode);
+    // console.log("decode verify: ", decode);
     req.keyStore = keyStore;
     return next();
   });

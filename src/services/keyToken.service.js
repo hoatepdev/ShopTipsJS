@@ -44,6 +44,10 @@ class KeyTokenService {
       .findOne({ user: Types.ObjectId.createFromHexString(userId) })
       .lean();
   };
+
+  static removeTokenById = async (_id) => {
+    return await keytokenModel.deleteOne({ _id }).lean();
+  };
 }
 
 module.exports = KeyTokenService;
