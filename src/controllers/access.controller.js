@@ -22,6 +22,15 @@ class AccessController {
       },
     }).send(res);
   };
+  logout = async (req, res, next) => {
+    new OK({
+      message: "Logout success!",
+      // metadata: await AccessService.login(req.body),
+      // options: {
+      //   limit: 10,
+      // },
+    }).send(res);
+  };
 }
 
 module.exports = new AccessController();

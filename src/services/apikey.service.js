@@ -7,7 +7,7 @@ const findById = async (key) => {
     key: crypto.randomBytes(64).toString("hex"),
     permissions: ["0000"],
   });
-  console.log("newKey", newKey);
+  // console.log("newKey", newKey);
   const objKey = await apikeyModel
     .findOne({
       key,

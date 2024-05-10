@@ -6,7 +6,7 @@ const crypto = require("crypto");
 const KeyTokenService = require("./keyToken.service");
 const { createTokenPair } = require("../auth/authUtils");
 const { getInfoData } = require("../utils");
-const { BadRequestError } = require("../core/error.response");
+const { BadRequestError, AuthFailureError } = require("../core/error.response");
 const { findByEmail } = require("./shop.service");
 
 const RoleShop = {
@@ -54,7 +54,7 @@ class AccessService {
     // const publicKeyObject = crypto.createPublicKey(publicKeyString);
     // console.log("publicKeyObject", publicKeyObject);
 
-    console.log("tokens2", tokens);
+    // console.log("tokens2", tokens);
     return tokens;
   };
 
@@ -63,7 +63,7 @@ class AccessService {
     if (!foundShop) throw new BadRequestError("Shop not registered");
 
     const match = await bcrypt.compare(password, foundShop.password);
-    if (!match) throw new BadRequestError("Authentication error");
+    if (!match) throw new AuthFailureError("Authentication error");
 
     return {
       code: 200,

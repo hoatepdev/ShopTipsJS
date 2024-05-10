@@ -8,7 +8,7 @@ x-api-key: 341c3aae93f727e6a85bfdbdc285feca12e62a3e96bbdda4c15bd8147d73bc5f162b6
 
 {
     "name": "Shop TIPS 1",
-    "email": "shoptips34@gmail.com",
+    "email": "shoptips35@gmail.com",
     "password": "abc123"
 }
  
@@ -21,3 +21,17 @@ x-api-key: 341c3aae93f727e6a85bfdbdc285feca12e62a3e96bbdda4c15bd8147d73bc5f162b6
     "email": "shoptips32@gmail.com",
     "password": "abc123"
 }
+
+### logout
+POST {{url_dev}}/shop/logout
+Content-Type: application/json
+x-api-key: 341c3aae93f727e6a85bfdbdc285feca12e62a3e96bbdda4c15bd8147d73bc5f162b65e4cd88f8ce9bd6c6091bbe35692855330c94669b39e7b0f9cbf065e697
+x-client-id: 663dbff8f63a05deaddd79fb
+authorization: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjNkYmZmOGY2M2EwNWRlYWRkZDc5ZmIiLCJlbWFpbCI6InNob3B0aXBzMzVAZ21haWwuY29tIiwiaWF0IjoxNzE1MzIyODcyLCJleHAiOjE3MTU0OTU2NzJ9.dhHTrCkxatXCDakAGgoNeZOxm6XYlGUojk4TWl0HGDY1zQy_rLn5C7PB_RI1XOgLfUQfVqqjHM5ZNG6dlnJ5TRClv_vIKnzYxZC36N2KNW3uOCXZ69XYudE7wlfm-d3Ah7DfDfMUsxaoRO-Np4eJMKmf_aq6MZ6Skm5F9LuEUWXh8SvEIxFJvP0GzP7VaHCR-jYXu2YQSnuMK48EfI2M2robgKYvuvDV_xHnTs0Ivt47BJZQaDk6B0_sis9xHygzs2chKNtOyGp8kTC17j0MDVH49eAnMyA0Jz8sGcPnqDPrZ5rXSy9ipTvCY54AIOF5sEKQxU9aFP80zytZYCsj2uDhuNQQGGUjI1qGxgbZSOazJGOaWAvPXclHT6fkIIRKcnUGKCGhOajskOEOfbnQe5y440ACMwrNoD3eyMK265W0qtzzpnHcRHERBA3Fbfw4gDw7RdMSjRFZgBw7mTrbVnpp0iGZDxfOelbGbF1KYNFzYZmDSngU3xtIF8XZ4i161QyDjX_9D8UU-0xYJ8wgwPEZuo6SnWUtB-Acu11N9V4qWOHLjK3k34VEGTtbmIYwXsaiYKIWWGTrA0X-jQ6b-z-bkfglCG-r2Jm7dVxYjtxaV2FLa6jyNfA4O2LX9vFFZLqnzKdYooV1wy6IvxibvsRWDU1E3ec6dp0ALqKLo0Q
+
+{
+    "email": "shoptips32@gmail.com",
+    "password": "abc123"
+}
+
+
