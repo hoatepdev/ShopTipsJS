@@ -16,7 +16,7 @@ const productSchema = new Schema(
       type: String,
       require: true,
     },
-    product_thumb: {
+    product_description: {
       type: String,
     },
     product_price: {
