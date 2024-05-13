@@ -4,12 +4,14 @@ const shopModel = require("../models/shop.model");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const KeyTokenService = require("./keyToken.service");
-const { createTokenPair } = require("../auth/authUtils");
+const { createTokenPair, verifyJWT } = require("../auth/authUtils");
 const { getInfoData } = require("../utils");
-const { BadRequestError, AuthFailureError } = require("../core/error.response");
+const {
+  BadRequestError,
+  AuthFailureError,
+  ForbiddenError,
+} = require("../core/error.response");
 const { findByEmail } = require("./shop.service");
-const keytokenModel = require("../models/keytoken.model");
-
 const RoleShop = {
   SHOP: "SHOP",
   WRITER: "WRITER",
@@ -18,7 +20,7 @@ const RoleShop = {
 };
 
 class AccessService {
-  static generateTokens = async (shop) => {
+  static generateTokens = async (shop, refreshTokensUsed = []) => {
     const userId = shop._id.toString();
     // tạo cặp key theo thuật toán rsa
     const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
@@ -44,6 +46,7 @@ class AccessService {
       userId,
       publicKey,
       refreshToken: tokens.refreshToken,
+      refreshTokensUsed,
     });
 
     if (!keyToken) {
@@ -127,6 +130,57 @@ class AccessService {
     console.log("delKey", delKey);
 
     return delKey;
+  };
+
+  static handleRefreshToken = async (refreshToken) => {
+    // console.log("refreshToken", refreshToken);
+    // check refreshToken đã được sử dụng hay chưa
+    const foundToken = await KeyTokenService.findByRefreshTokensUsed(
+      refreshToken
+    );
+    console.log("foundToken", foundToken);
+    if (!foundToken) {
+      // tìm key theo refreshToken
+      const holderToken = await KeyTokenService.findByRefreshToken(
+        refreshToken
+      );
+      // console.log("holderToken", holderToken);
+
+      if (!holderToken)
+        throw new AuthFailureError("Shop not registered! - holderToken");
+
+      // verify refreshToken để lấy ra thông tin user
+      const { userId, email } = await verifyJWT(
+        refreshToken,
+        holderToken.publicKey
+      );
+      console.log("holderToken", holderToken);
+
+      // tìm shop theo email
+      const foundShop = await findByEmail({ email });
+
+      if (!foundShop) throw new AuthFailureError("Shop not registered");
+      // tạo cặp key mới
+
+      return {
+        code: 201,
+        metadata: {
+          shop: getInfoData({
+            fileds: ["_id", "name", "email"],
+            object: foundShop,
+          }),
+          tokens: await this.generateTokens(foundShop, [
+            ...holderToken.refreshTokensUsed,
+            refreshToken,
+          ]),
+        },
+      };
+    }
+    // nếu sử dụng rồi thì xóa hết key đi và báo lỗi
+
+    // console.log({ userId, email });
+    await KeyTokenService.deleteKeyByRefreshToken(foundToken.refreshToken);
+    throw new ForbiddenError();
   };
 }
 

@@ -17,7 +17,7 @@ class KeyTokenService {
       const filter = { user: userId },
         update = {
           publicKey: publicKeyString,
-          refreshTokensUsed: [],
+          refreshTokensUsed,
           refreshToken,
         },
         options = {
@@ -47,6 +47,29 @@ class KeyTokenService {
 
   static removeTokenById = async (_id) => {
     return await keytokenModel.deleteOne({ _id }).lean();
+  };
+
+  static findByRefreshTokensUsed = async (refreshToken) => {
+    return await keytokenModel
+      .findOne({ refreshTokensUsed: { $in: [refreshToken] } })
+      .lean();
+  };
+
+  static findByRefreshToken = async (refreshToken) => {
+    return keytokenModel
+      .findOne({ refreshToken })
+      .catch((err) => console.log("err", err));
+  };
+
+  static deleteKeyById = async (userId) => {
+    return await keytokenModel.findByIdAndDelete({
+      user: userId,
+    });
+  };
+  static deleteKeyByRefreshToken = async (refreshToken) => {
+    return await keytokenModel.deleteOne({
+      refreshToken,
+    });
   };
 }
 
