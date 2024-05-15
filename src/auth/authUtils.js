@@ -8,25 +8,25 @@ const HEADER = {
   API_KEY: "x-api-key",
   CLIENT_ID: "x-client-id",
   AUTHORIZATION: "authorization",
+  REFRESHTOKEN: "x-rtoken-id",
 };
 
-const createTokenPair = async (payload, publicKey, privateKey) => {
+const createTokenPair = async (payload, privateKey) => {
   try {
     // accessToken
     const accessToken = await JWT.sign(payload, privateKey, {
       algorithm: "RS256",
-      expiresIn: "2 days",
+      expiresIn: "2h",
     });
     const refreshToken = await JWT.sign(payload, privateKey, {
       algorithm: "RS256",
       expiresIn: "2 days",
     });
-
     // verify
-    JWT.verify(accessToken, publicKey, (err, decode) => {
-      if (err) console.log("error verify: ", err);
-      // console.log("decode verify: ", decode);
-    });
+    // JWT.verify(accessToken, publicKey, (err, decode) => {
+    //   if (err) console.log("error verify: ", err);
+    //   // console.log("decode verify: ", decode);
+    // });
     return {
       accessToken,
       refreshToken,
@@ -41,20 +41,28 @@ const authentication = asyncHandler(async (req, res, next) => {
   const keyStore = await findByUserId(userId);
   if (!keyStore) throw new NotFoundError("Invalid request");
 
-  const accessToken = req.headers[HEADER.AUTHORIZATION];
-  if (!accessToken) throw new AuthFailureError("Invalid request");
-  // console.log("accessToken", accessToken);
-  // console.log("publicKey", keyStore.publicKey);
-  JWT.verify(accessToken, keyStore.publicKey, (err, decode) => {
-    if (err) throw new AuthFailureError("Invalid request");
-    // console.log("decode verify: ", decode);
-    req.keyStore = keyStore;
-    return next();
-  });
+  // console.log("keyStore", keyStore);
+  if (req.headers[HEADER.REFRESHTOKEN]) {
+    const refreshToken = req.headers[HEADER.REFRESHTOKEN];
+    // console.log("refreshToken", refreshToken);
+    JWT.verify(refreshToken, keyStore.publicKey, (err, decode) => {
+      if (err) throw new AuthFailureError("Invalid request");
+      // console.log("decode verify: ", decode);
+      req.keyStore = keyStore;
+      req.user = decode;
+      req.refreshToken = refreshToken;
 
-  try {
-  } catch (error) {
-    throw error;
+      const accessToken = req.headers[HEADER.AUTHORIZATION];
+      if (!accessToken) throw new AuthFailureError("Invalid request");
+      console.log("accessToken1", accessToken);
+      console.log("publicKey", keyStore.publicKey);
+      JWT.verify(accessToken, keyStore.publicKey, (err, decode) => {
+        if (err) throw new AuthFailureError("Invalid request1", err);
+        // console.log("decode verify: ", decode);
+        req.keyStore = keyStore;
+        next();
+      });
+    });
   }
 });
 

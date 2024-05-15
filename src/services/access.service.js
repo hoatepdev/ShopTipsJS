@@ -12,6 +12,7 @@ const {
   ForbiddenError,
 } = require("../core/error.response");
 const { findByEmail } = require("./shop.service");
+
 const RoleShop = {
   SHOP: "SHOP",
   WRITER: "WRITER",
@@ -37,7 +38,6 @@ class AccessService {
     // create access token và refresh token - verify token
     const tokens = await createTokenPair(
       { userId, email: shop.email },
-      publicKey,
       privateKey
     );
 
@@ -55,10 +55,6 @@ class AccessService {
         message: "keyToken error!",
       };
     }
-    // const publicKeyObject = crypto.createPublicKey(publicKeyString);
-    // console.log("publicKeyObject", publicKeyObject);
-
-    // console.log("tokens2", tokens);
     return tokens;
   };
 
@@ -124,63 +120,44 @@ class AccessService {
   };
 
   static logout = async (keyStore) => {
-    console.log("keyStore", keyStore);
     const delKey = await KeyTokenService.removeTokenById(keyStore._id);
-
-    console.log("delKey", delKey);
 
     return delKey;
   };
 
-  static handleRefreshToken = async (refreshToken) => {
-    // console.log("refreshToken", refreshToken);
-    // check refreshToken đã được sử dụng hay chưa
-    const foundToken = await KeyTokenService.findByRefreshTokensUsed(
-      refreshToken
-    );
-    console.log("foundToken", foundToken);
-    if (!foundToken) {
-      // tìm key theo refreshToken
-      const holderToken = await KeyTokenService.findByRefreshToken(
-        refreshToken
-      );
-      // console.log("holderToken", holderToken);
+  static handlerRefreshToken = async ({ refreshToken, user, keyStore }) => {
+    const { userId, email } = user;
 
-      if (!holderToken)
-        throw new AuthFailureError("Shop not registered! - holderToken");
-
-      // verify refreshToken để lấy ra thông tin user
-      const { userId, email } = await verifyJWT(
-        refreshToken,
-        holderToken.publicKey
-      );
-      console.log("holderToken", holderToken);
-
-      // tìm shop theo email
-      const foundShop = await findByEmail({ email });
-
-      if (!foundShop) throw new AuthFailureError("Shop not registered");
-      // tạo cặp key mới
-
-      return {
-        code: 201,
-        metadata: {
-          shop: getInfoData({
-            fileds: ["_id", "name", "email"],
-            object: foundShop,
-          }),
-          tokens: await this.generateTokens(foundShop, [
-            ...holderToken.refreshTokensUsed,
-            refreshToken,
-          ]),
-        },
-      };
+    if (keyStore.refreshTokensUsed.includes(refreshToken)) {
+      await KeyTokenService.deleteKeyByRefreshToken(foundToken.refreshToken);
+      throw new ForbiddenError();
     }
-    // nếu sử dụng rồi thì xóa hết key đi và báo lỗi
 
-    // console.log({ userId, email });
-    await KeyTokenService.deleteKeyByRefreshToken(foundToken.refreshToken);
-    throw new ForbiddenError();
+    if (keyStore.refreshToken !== refreshToken) {
+      throw new AuthFailureError("Shop not registered! - keyStore");
+    }
+
+    const foundShop = await findByEmail({ email });
+
+    if (!foundShop) throw new AuthFailureError("Shop not registered");
+
+    // console.log("foundShop", foundShop);
+    // tạo cặp key mới
+    const tokens = await this.generateTokens(foundShop, [
+      ...keyStore.refreshTokensUsed,
+      refreshToken,
+    ]);
+
+    return {
+      code: 200,
+      metadata: {
+        shop: getInfoData({
+          fileds: ["_id", "name", "email"],
+          object: foundShop,
+        }),
+        tokens,
+      },
+    };
   };
 }
 
