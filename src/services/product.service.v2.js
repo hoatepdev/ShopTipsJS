@@ -8,6 +8,8 @@ const {
   furniture,
 } = require("../models/product.model");
 
+const { findAllDraftsForShop } = require("../models/repositories/product.repo");
+
 class ProductFactory {
   static productRegistry = {}; // key - class
 
@@ -21,6 +23,13 @@ class ProductFactory {
     if (!productClass)
       throw new BadRequestError(`Invalid Product types ${type}`);
     return new productClass(payload).createProduct();
+  }
+
+  // query
+  static async findAllDraftsForShop({ product_shop, limit = 50, skip = 0 }) {
+    const query = { product_shop, isDraft: true };
+
+    return await findAllDraftsForShop({ query, limit, skip });
   }
 }
 
