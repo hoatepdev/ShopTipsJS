@@ -40,7 +40,15 @@ class ProductController {
       }),
     }).send(res);
   };
-
+  unPublishProductByShop = async (req, res, next) => {
+    new SuccessResponse({
+      message: "Unpublish product success!",
+      metadata: await ProductFactoryV2.unPublishProductByShop({
+        product_id: req.params.id,
+        product_shop: req.user.userId,
+      }),
+    }).send(res);
+  };
   // query
   /**
    * @desc Get all Drafts for shop
@@ -63,6 +71,13 @@ class ProductController {
       metadata: await ProductFactoryV2.findAllPublishForShop({
         product_shop: req.user.userId,
       }),
+    }).send(res);
+  };
+
+  getListSearchProduct = async (req, res, next) => {
+    new SuccessResponse({
+      message: "Get all drafts for shop success!",
+      metadata: await ProductFactoryV2.getListSearchProduct(req.params),
     }).send(res);
   };
 }
