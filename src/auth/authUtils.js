@@ -45,11 +45,11 @@ const authentication = asyncHandler(async (req, res, next) => {
   const keyStore = await findByUserId(userId);
   if (!keyStore) throw new NotFoundError("Invalid request 0");
 
-  console.log(
-    HEADER.REFRESHTOKEN,
-    req.headers,
-    req.headers[HEADER.REFRESHTOKEN]
-  );
+  // console.log(
+  //   HEADER.REFRESHTOKEN,
+  //   req.headers,
+  //   req.headers[HEADER.REFRESHTOKEN]
+  // );
 
   const refreshToken = req.headers[HEADER.REFRESHTOKEN];
   if (!refreshToken) {

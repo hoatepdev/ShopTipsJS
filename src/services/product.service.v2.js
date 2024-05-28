@@ -8,7 +8,11 @@ const {
   furniture,
 } = require("../models/product.model");
 
-const { findAllDraftsForShop } = require("../models/repositories/product.repo");
+const {
+  findAllDraftsForShop,
+  publishProductByShop,
+  findAllPublishForShop,
+} = require("../models/repositories/product.repo");
 
 class ProductFactory {
   static productRegistry = {}; // key - class
@@ -18,18 +22,28 @@ class ProductFactory {
   }
 
   static async createProduct(type, payload) {
-    console.log("type", type, payload);
+    if (!ProductFactory.productRegistry[type])
+      throw new BadRequestError(`Invalid Product types ${type}`);
     const productClass = ProductFactory.productRegistry[type];
     if (!productClass)
       throw new BadRequestError(`Invalid Product types ${type}`);
     return new productClass(payload).createProduct();
   }
 
+  // put
+  static async publishProductByShop({ product_id, product_shop }) {
+    return await publishProductByShop({ product_id, product_shop });
+  }
+
   // query
   static async findAllDraftsForShop({ product_shop, limit = 50, skip = 0 }) {
     const query = { product_shop, isDraft: true };
-
     return await findAllDraftsForShop({ query, limit, skip });
+  }
+
+  static async findAllPublishForShop({ product_shop, limit = 50, skip = 0 }) {
+    const query = { product_shop, isPublished: true };
+    return await findAllPublishForShop({ query, limit, skip });
   }
 }
 
