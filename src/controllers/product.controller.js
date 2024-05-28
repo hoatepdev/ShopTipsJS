@@ -67,7 +67,7 @@ class ProductController {
 
   getAllPublishForShop = async (req, res, next) => {
     new SuccessResponse({
-      message: "Get all drafts for shop success!",
+      message: "Get all publish for shop success!",
       metadata: await ProductFactoryV2.findAllPublishForShop({
         product_shop: req.user.userId,
       }),
@@ -76,8 +76,24 @@ class ProductController {
 
   getListSearchProduct = async (req, res, next) => {
     new SuccessResponse({
-      message: "Get all drafts for shop success!",
+      message: "Get product success!",
       metadata: await ProductFactoryV2.getListSearchProduct(req.params),
+    }).send(res);
+  };
+
+  findAllProduct = async (req, res, next) => {
+    new SuccessResponse({
+      message: "Get all product for shop success!",
+      metadata: await ProductFactoryV2.findAllProduct(req.params),
+    }).send(res);
+  };
+
+  findProduct = async (req, res, next) => {
+    new SuccessResponse({
+      message: "Get product success!",
+      metadata: await ProductFactoryV2.findProduct({
+        product_id: req.params.product_id,
+      }),
     }).send(res);
   };
 }
